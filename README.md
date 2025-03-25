@@ -203,5 +203,3 @@ npm run test:setup
 ### Executando os Testes
 
 npm run test
-
-```bash
