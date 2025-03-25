@@ -1,0 +1,59 @@
+### Variáveis globais
+@baseUrl = http://localhost:3000/api
+@token = {{login.response.body.token}}
+
+### Health Check
+GET http://localhost:3000/health
+
+### Login (obter token)
+# @name login
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "email": "george.bluth@reqres.in",
+  "password": "password123"
+}
+
+### Listar usuários (paginação)
+GET {{baseUrl}}/users?page=1&per_page=5
+Authorization: Bearer {{token}}
+
+### Obter usuário por ID
+GET {{baseUrl}}/users/1
+Authorization: Bearer {{token}}
+
+### Atualizar usuário
+PUT {{baseUrl}}/users/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "firstName": "George Updated",
+  "lastName": "Bluth Updated"
+}
+
+### Deletar usuário
+DELETE {{baseUrl}}/users/2
+Authorization: Bearer {{token}}
+
+### Tentativa de login com credenciais inválidas
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "email": "invalid@email.com",
+  "password": "wrongpassword"
+}
+
+### Acessar endpoint protegido sem token
+GET {{baseUrl}}/users
+# Sem Authorization header
+
+### Acessar endpoint protegido com token inválido
+GET {{baseUrl}}/users
+Authorization: Bearer invalid_token_here
+
+### Buscar usuário que não existe
+GET {{baseUrl}}/users/999
+Authorization: Bearer {{token}}

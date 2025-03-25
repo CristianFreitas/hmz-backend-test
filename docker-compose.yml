@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: hmz_postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: hmzuser
+      POSTGRES_PASSWORD: hmzpassword
+      POSTGRES_DB: hmz_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hmzuser -d hmz_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hmz-network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hmz_api
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://hmzuser:hmzpassword@postgres:5432/hmz_db?schema=public
+      JWT_SECRET: ${JWT_SECRET:-seu_jwt_secret_seguro_aqui}
+      JWT_EXPIRES_IN: 24h
+      PORT: 3000
+    command: >
+      sh -c "npx prisma migrate deploy &&
+             npx prisma generate && 
+             node /app/prisma/seed.js && 
+             npm start"
+    networks:
+      - hmz-network
+
+networks:
+  hmz-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
